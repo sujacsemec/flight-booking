@@ -1,0 +1,1327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aerowave — Book flights</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#10213A;
+    --ink-soft:#1B3358;
+    --paper:#F4F5F1;
+    --paper-dim:#E9EAE4;
+    --amber:#E2A33B;
+    --amber-deep:#C6852033;
+    --teal:#1F6F6B;
+    --line:#D8D4C8;
+    --line-dark:#2B4269;
+    --muted:#5C6675;
+    --muted-light:#9AA6C4;
+    --radius:2px;
+    color-scheme: light;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'IBM Plex Sans',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{
+    font-family:'Fraunces',serif;
+    font-weight:500;
+    margin:0;
+    letter-spacing:-0.01em;
+  }
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  a{color:inherit;}
+  button{font-family:inherit;cursor:pointer;}
+  input,select{font-family:inherit;}
+  :focus-visible{outline:2px solid var(--teal);outline-offset:2px;}
+
+  .wrap{max-width:1120px;margin:0 auto;padding:0 28px;}
+
+  /* ---------- NAV ---------- */
+  .nav{
+    position:sticky;top:0;z-index:50;
+    background:var(--ink);
+    border-bottom:1px solid var(--line-dark);
+  }
+  .nav-inner{
+    max-width:1120px;margin:0 auto;padding:0 28px;
+    display:flex;align-items:center;justify-content:space-between;
+    height:64px;color:var(--paper);
+  }
+  .brand{display:flex;align-items:center;gap:10px;font-family:'Fraunces',serif;font-size:20px;font-weight:600;}
+  .brand-mark{width:20px;height:20px;flex:none;}
+  .nav-links{display:flex;gap:28px;font-size:14px;color:var(--muted-light);}
+  .nav-links a{text-decoration:none;transition:color .15s;}
+  .nav-links a:hover{color:var(--paper);}
+  .nav-cta{
+    background:transparent;border:1px solid var(--line-dark);color:var(--paper);
+    padding:8px 16px;font-size:13px;border-radius:var(--radius);
+    transition:border-color .15s,background .15s;
+  }
+  .nav-cta:hover{border-color:var(--amber);background:rgba(226,163,59,.08);}
+  @media (max-width:720px){ .nav-links{display:none;} }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    background:var(--ink);
+    color:var(--paper);
+    padding:64px 0 0;
+    position:relative;
+    overflow:hidden;
+  }
+  .hero-top{max-width:1120px;margin:0 auto;padding:0 28px;position:relative;z-index:2;}
+  .flap-line{
+    display:flex;flex-wrap:wrap;gap:6px 10px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;letter-spacing:.06em;
+    color:var(--muted-light);
+    margin-bottom:22px;
+  }
+  .flap-line span{
+    border:1px solid var(--line-dark);
+    padding:3px 8px;border-radius:var(--radius);
+  }
+  .hero h1{
+    font-size:clamp(34px,5.4vw,58px);
+    line-height:1.04;
+    max-width:11ch;
+    color:var(--paper);
+  }
+  .hero h1 em{font-style:italic;color:var(--amber);}
+  .hero-sub{
+    margin-top:18px;max-width:46ch;
+    color:var(--muted-light);font-size:16px;line-height:1.6;
+  }
+
+  /* boarding pass search card */
+  .pass{
+    margin:40px 0 -120px;
+    background:var(--paper);
+    color:var(--ink);
+    border-radius:6px;
+    position:relative;
+    box-shadow:0 30px 60px -20px rgba(0,0,0,.45);
+    z-index:3;
+  }
+  .pass-top{
+    display:grid;
+    grid-template-columns:1fr 1fr auto auto auto;
+    gap:0;
+    align-items:stretch;
+  }
+  .pass-field{
+    padding:18px 20px;
+    border-right:1px solid var(--line);
+    display:flex;flex-direction:column;gap:6px;
+    min-width:0;
+  }
+  .pass-field:last-of-type{border-right:none;}
+  .pass-label{
+    font-size:11px;color:var(--muted);letter-spacing:.02em;
+  }
+  .pass-field input,.pass-field select{
+    border:none;background:transparent;font-size:16px;color:var(--ink);
+    padding:0;width:100%;
+  }
+  .pass-field input:focus,.pass-field select:focus{outline:none;}
+  .swap-btn{
+    align-self:center;justify-self:center;
+    width:30px;height:30px;border-radius:50%;
+    border:1px solid var(--line);background:var(--paper);
+    display:flex;align-items:center;justify-content:center;
+    color:var(--muted);position:relative;left:-15px;z-index:2;
+    transition:transform .2s, border-color .2s, color .2s;
+  }
+  .swap-btn:hover{border-color:var(--teal);color:var(--teal);transform:rotate(180deg);}
+  .pass-city{font-size:20px;font-family:'Fraunces',serif;}
+  .pass-code{font-size:12px;color:var(--muted);font-family:'IBM Plex Mono',monospace;}
+
+  .pass-bottom{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 20px;background:var(--paper-dim);
+    border-top:1px dashed var(--line);
+    border-radius:0 0 6px 6px;
+    gap:16px;flex-wrap:wrap;
+  }
+  .pass-options{display:flex;gap:22px;flex-wrap:wrap;}
+  .pass-opt{display:flex;flex-direction:column;gap:4px;}
+  .pass-opt label{font-size:11px;color:var(--muted);}
+  .pass-opt select{
+    border:1px solid var(--line);background:var(--paper);
+    padding:6px 10px;border-radius:var(--radius);font-size:13px;color:var(--ink);
+  }
+  .search-btn{
+    background:var(--ink);color:var(--paper);border:none;
+    padding:13px 28px;font-size:14px;font-weight:500;
+    border-radius:var(--radius);
+    display:flex;align-items:center;gap:8px;
+    transition:background .15s;
+    white-space:nowrap;
+  }
+  .search-btn:hover{background:var(--ink-soft);}
+  .search-btn svg{width:16px;height:16px;}
+
+  @media (max-width:860px){
+    .pass-top{grid-template-columns:1fr;}
+    .pass-field{border-right:none;border-bottom:1px solid var(--line);}
+    .swap-btn{position:absolute;right:20px;top:64px;left:auto;transform:rotate(90deg);}
+    .swap-btn:hover{transform:rotate(270deg);}
+    .pass{margin-bottom:-60px;}
+  }
+
+  /* ---------- RESULTS ---------- */
+  .results-section{
+    background:var(--paper);
+    padding:180px 0 40px;
+  }
+  @media (max-width:860px){ .results-section{padding-top:110px;} }
+
+  .results-head{
+    display:flex;align-items:baseline;justify-content:space-between;
+    margin-bottom:18px;flex-wrap:wrap;gap:10px;
+    border-bottom:1px solid var(--line);
+    padding-bottom:14px;
+  }
+  .results-head h2{font-size:24px;}
+  .results-count{color:var(--muted);font-size:13px;}
+  .sort-row{display:flex;gap:8px;font-size:13px;}
+  .sort-btn{
+    background:none;border:1px solid var(--line);color:var(--muted);
+    padding:6px 12px;border-radius:var(--radius);
+    transition:border-color .15s,color .15s;
+  }
+  .sort-btn.active{border-color:var(--ink);color:var(--ink);background:var(--paper-dim);}
+
+  .board{
+    border:1px solid var(--line);
+    border-radius:4px;
+    overflow:hidden;
+    background:#fff;
+  }
+  .board-header-row{
+    display:grid;
+    grid-template-columns: 1.4fr 1.2fr 1fr .9fr .8fr;
+    gap:12px;
+    padding:10px 20px;
+    font-size:11px;color:var(--muted);
+    background:var(--paper-dim);
+    border-bottom:1px solid var(--line);
+  }
+  .flight-row{
+    display:grid;
+    grid-template-columns: 1.4fr 1.2fr 1fr .9fr .8fr;
+    gap:12px;align-items:center;
+    padding:18px 20px;
+    border-bottom:1px solid var(--line);
+    transition:background .15s;
+    cursor:pointer;
+  }
+  .flight-row:last-child{border-bottom:none;}
+  .flight-row:hover{background:var(--paper-dim);}
+  .flight-row.selected{background:#EFF6F5;box-shadow:inset 3px 0 0 var(--teal);}
+  .fr-airline{display:flex;flex-direction:column;gap:3px;}
+  .fr-airline .name{font-size:14px;font-weight:500;}
+  .fr-airline .num{font-size:11px;color:var(--muted);}
+  .fr-time{font-family:'IBM Plex Mono',monospace;font-size:15px;display:flex;align-items:center;gap:10px;}
+  .fr-time .arrow{color:var(--muted-light);font-size:12px;}
+  .fr-time .code{font-size:11px;color:var(--muted);font-family:'IBM Plex Sans',sans-serif;}
+  .fr-duration{font-size:13px;color:var(--muted);}
+  .fr-duration .stop{display:block;font-size:11px;margin-top:2px;}
+  .fr-cabin{font-size:13px;color:var(--muted);}
+  .fr-price{text-align:right;}
+  .fr-price .amt{font-family:'IBM Plex Mono',monospace;font-size:17px;color:var(--ink);}
+  .fr-price .per{display:block;font-size:11px;color:var(--muted);}
+
+  @media (max-width:760px){
+    .board-header-row{display:none;}
+    .flight-row{grid-template-columns:1fr;gap:6px;}
+    .fr-price{text-align:left;}
+  }
+
+  .empty-state{
+    text-align:center;padding:60px 20px;color:var(--muted);
+  }
+  .empty-state h3{font-size:20px;margin-bottom:8px;color:var(--ink);}
+
+  /* ---------- SUMMARY DRAWER ---------- */
+  .drawer-backdrop{
+    position:fixed;inset:0;background:rgba(16,33,58,.5);
+    z-index:90;opacity:0;pointer-events:none;transition:opacity .2s;
+  }
+  .drawer-backdrop.open{opacity:1;pointer-events:auto;}
+  .drawer{
+    position:fixed;top:0;right:0;bottom:0;width:min(420px,100%);
+    background:var(--paper);z-index:91;
+    transform:translateX(100%);transition:transform .25s ease;
+    display:flex;flex-direction:column;
+    box-shadow:-20px 0 40px rgba(0,0,0,.2);
+  }
+  .drawer.open{transform:translateX(0);}
+  .drawer-head{
+    padding:22px 24px;border-bottom:1px solid var(--line);
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  .drawer-head h3{font-size:19px;}
+  .drawer-close{background:none;border:none;font-size:22px;color:var(--muted);line-height:1;padding:4px;}
+  .drawer-body{padding:24px;overflow-y:auto;flex:1;}
+  .drawer-flight{
+    border:1px dashed var(--line);border-radius:4px;padding:16px;margin-bottom:20px;
+  }
+  .drawer-row{display:flex;justify-content:space-between;font-size:14px;padding:9px 0;border-bottom:1px solid var(--line);}
+  .drawer-row:last-child{border-bottom:none;}
+  .drawer-row.total{font-weight:600;font-size:16px;padding-top:14px;}
+  .drawer-row .amt{font-family:'IBM Plex Mono',monospace;}
+  .field-group{margin-bottom:16px;}
+  .field-group label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;}
+  .field-group input{
+    width:100%;border:1px solid var(--line);border-radius:var(--radius);
+    padding:10px 12px;font-size:14px;background:#fff;
+  }
+  .drawer-foot{padding:20px 24px;border-top:1px solid var(--line);}
+  .confirm-btn{
+    width:100%;background:var(--teal);color:#fff;border:none;
+    padding:14px;border-radius:var(--radius);font-size:14px;font-weight:500;
+    transition:background .15s;
+  }
+  .confirm-btn:hover{background:#195c58;}
+  .confirm-btn:disabled{background:var(--muted-light);cursor:not-allowed;}
+
+  .booked-state{text-align:center;padding:20px 4px;}
+  .booked-mark{
+    width:52px;height:52px;border-radius:50%;background:var(--teal);
+    color:#fff;display:flex;align-items:center;justify-content:center;
+    margin:0 auto 18px;font-size:24px;
+  }
+  .booked-ref{
+    font-family:'IBM Plex Mono',monospace;font-size:20px;letter-spacing:.04em;
+    background:var(--paper-dim);border-radius:4px;padding:10px;margin:14px 0;
+  }
+  .pay-receipt{
+    display:flex;justify-content:space-between;font-size:12px;color:var(--muted);
+    border-top:1px dashed var(--line);padding-top:10px;margin-top:10px;
+  }
+
+  .pay-amount{
+    background:var(--paper-dim);border-radius:4px;padding:18px;text-align:center;margin-bottom:22px;
+  }
+  .pay-amount-label{display:block;font-size:11px;color:var(--muted);margin-bottom:4px;}
+  .pay-amount-value{font-family:'IBM Plex Mono',monospace;font-size:26px;color:var(--ink);}
+  .pay-methods{display:flex;flex-direction:column;gap:9px;}
+  .pay-method{
+    display:flex;align-items:center;gap:12px;width:100%;text-align:left;
+    background:#fff;border:1px solid var(--line);border-radius:4px;padding:11px 14px;
+    font-size:14px;color:var(--ink);transition:border-color .15s,background .15s;
+    position:relative;
+  }
+  .pay-method:hover{border-color:var(--teal);}
+  .pay-method.selected{border-color:var(--teal);background:#EFF6F5;box-shadow:inset 3px 0 0 var(--teal);}
+  .pay-icon{
+    width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-size:12px;font-weight:600;font-family:'IBM Plex Mono',monospace;flex:none;
+  }
+  .pay-check{margin-left:auto;color:var(--teal);opacity:0;font-size:15px;}
+  .pay-method.selected .pay-check{opacity:1;}
+  .pay-note{font-size:12px;color:var(--muted);margin-top:16px;text-align:center;line-height:1.5;}
+  .pay-processing{text-align:center;padding:34px 10px;}
+  .spinner{
+    width:36px;height:36px;border:3px solid var(--line);border-top-color:var(--teal);
+    border-radius:50%;margin:0 auto 18px;animation:spin .8s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  .routes{padding:70px 0;background:var(--paper-dim);border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+  .routes h2{font-size:26px;margin-bottom:6px;}
+  .routes-sub{color:var(--muted);font-size:14px;margin-bottom:30px;}
+  .route-table{width:100%;border-collapse:collapse;font-size:14px;}
+  .route-table th{
+    text-align:left;font-weight:400;color:var(--muted);font-size:11px;
+    padding:0 16px 10px;border-bottom:1px solid var(--line);
+  }
+  .route-table td{
+    padding:16px;border-bottom:1px solid var(--line);
+  }
+  .route-table tr:last-child td{border-bottom:none;}
+  .route-table tr{cursor:pointer;transition:background .15s;}
+  .route-table tr:hover td{background:#fff;}
+  .route-pair{font-family:'Fraunces',serif;font-size:16px;}
+  .route-price{font-family:'IBM Plex Mono',monospace;text-align:right;}
+  @media (max-width:640px){
+    .route-table thead{display:none;}
+    .route-table, .route-table tbody, .route-table tr, .route-table td{display:block;width:100%;}
+    .route-table tr{border-bottom:1px solid var(--line);padding:12px 0;}
+    .route-table td{border:none;padding:2px 0;}
+  }
+
+  /* ---------- WHY SECTION ---------- */
+  .why{padding:70px 0;}
+  .why h2{font-size:26px;margin-bottom:36px;max-width:20ch;}
+  .why-rows{border-top:1px solid var(--line);}
+  .why-row{
+    display:grid;grid-template-columns:60px 1fr 2fr;gap:24px;
+    padding:26px 0;border-bottom:1px solid var(--line);
+    align-items:baseline;
+  }
+  .why-row .idx{font-family:'IBM Plex Mono',monospace;color:var(--muted-light);font-size:13px;}
+  .why-row h3{font-size:17px;}
+  .why-row p{margin:0;color:var(--muted);font-size:14px;line-height:1.6;max-width:52ch;}
+  @media (max-width:640px){ .why-row{grid-template-columns:1fr;gap:6px;} }
+
+  /* ---------- FOOTER ---------- */
+  footer{background:var(--ink);color:var(--muted-light);padding:36px 0;font-size:13px;}
+  .foot-row{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+
+  /* ---------- AUTH MODAL ---------- */
+  .auth-backdrop{
+    position:fixed;inset:0;background:rgba(16,33,58,.55);
+    z-index:95;opacity:0;pointer-events:none;transition:opacity .2s;
+    display:flex;align-items:center;justify-content:center;padding:20px;
+  }
+  .auth-backdrop.open{opacity:1;pointer-events:auto;}
+  .auth-modal{
+    background:var(--paper);border-radius:6px;width:100%;max-width:380px;
+    box-shadow:0 30px 60px -20px rgba(0,0,0,.5);
+    transform:translateY(14px) scale(.98);opacity:0;transition:transform .2s,opacity .2s;
+    overflow:hidden;
+  }
+  .auth-backdrop.open .auth-modal{transform:translateY(0) scale(1);opacity:1;}
+  .auth-head{
+    padding:22px 24px 0;display:flex;align-items:center;justify-content:space-between;
+  }
+  .auth-head h3{font-size:20px;}
+  .auth-close{background:none;border:none;font-size:22px;color:var(--muted);line-height:1;padding:4px;}
+  .auth-tabs{display:flex;gap:0;margin:16px 24px 0;border-bottom:1px solid var(--line);}
+  .auth-tab{
+    flex:1;background:none;border:none;padding:10px 4px;font-size:13px;color:var(--muted);
+    border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .15s,border-color .15s;
+  }
+  .auth-tab.active{color:var(--ink);border-color:var(--teal);font-weight:500;}
+  .auth-body{padding:22px 24px 24px;}
+  .auth-error{
+    background:#FBEAEA;border:1px solid #E8B4B4;color:#8A2E2E;
+    font-size:13px;padding:9px 12px;border-radius:var(--radius);margin-bottom:14px;
+    display:none;
+  }
+  .auth-error.show{display:block;}
+  .auth-hint{font-size:12px;color:var(--muted);margin:-6px 0 14px;}
+  .auth-submit{
+    width:100%;background:var(--ink);color:var(--paper);border:none;
+    padding:13px;border-radius:var(--radius);font-size:14px;font-weight:500;
+    transition:background .15s;margin-top:4px;
+  }
+  .auth-submit:hover{background:var(--ink-soft);}
+  .auth-submit:disabled{background:var(--muted-light);cursor:not-allowed;}
+  .auth-switch{text-align:center;font-size:13px;color:var(--muted);margin-top:16px;}
+  .auth-switch button{background:none;border:none;color:var(--teal);font-weight:500;padding:0;}
+  .auth-success{text-align:center;padding:6px 0 4px;}
+
+  .account-chip{
+    display:flex;align-items:center;gap:10px;background:none;border:1px solid var(--line-dark);
+    color:var(--paper);padding:6px 14px 6px 6px;border-radius:20px;font-size:13px;
+    transition:border-color .15s;
+  }
+  .account-chip:hover{border-color:var(--amber);}
+  .account-avatar{
+    width:26px;height:26px;border-radius:50%;background:var(--amber);color:var(--ink);
+    display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;
+    font-family:'IBM Plex Mono',monospace;flex:none;
+  }
+  .account-menu{
+    position:absolute;top:56px;right:28px;background:var(--paper);color:var(--ink);
+    border:1px solid var(--line);border-radius:4px;min-width:170px;
+    box-shadow:0 14px 30px rgba(0,0,0,.18);
+    display:none;flex-direction:column;overflow:hidden;z-index:60;
+  }
+  .account-menu.open{display:flex;}
+  .account-menu .who{padding:12px 14px;font-size:13px;border-bottom:1px solid var(--line);color:var(--muted);}
+  .account-menu button{
+    background:none;border:none;text-align:left;padding:11px 14px;font-size:13px;color:var(--ink);
+    transition:background .15s;
+  }
+  .account-menu button:hover{background:var(--paper-dim);}
+
+  .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);}
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none !important;scroll-behavior:auto !important;}
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 24 24" fill="none"><path d="M2 16.5 21 8l1 2-8.5 5.2L15 21l-2 1-4-5-4 1.3-1.5-1.5L6 15 2 16.5Z" fill="#E2A33B"/></svg>
+      Aerowave
+    </div>
+    <div class="nav-links">
+      <a href="#search">Book</a>
+      <a href="#routes">Routes</a>
+      <a href="#why">Why us</a>
+    </div>
+    <div style="position:relative;">
+      <button class="nav-cta" id="navAuthBtn">Sign in</button>
+      <div class="account-menu" id="accountMenu">
+        <div class="who" id="accountWho"></div>
+        <button type="button" id="signOutBtn">Sign out</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<header class="hero" id="search">
+  <div class="hero-top">
+    <div class="flap-line">
+      <span>MAA → DEL</span><span>BLR → BOM</span><span>CJB → HYD</span><span>on time · 96%</span>
+    </div>
+    <h1>Fly where the <em>story</em> takes you.</h1>
+    <p class="hero-sub">Search real fares across domestic routes, compare in one board, and hold your seat in under two minutes.</p>
+  </div>
+
+  <div class="wrap">
+    <form class="pass" id="searchForm">
+      <div class="pass-top">
+        <div class="pass-field">
+          <span class="pass-label">From</span>
+          <select id="fromCity"></select>
+        </div>
+        <div class="pass-field" style="position:relative;">
+          <span class="pass-label">To</span>
+          <select id="toCity"></select>
+          <button type="button" class="swap-btn" id="swapBtn" aria-label="Swap origin and destination">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 7h13l-4-4M17 17H4l4 4"/></svg>
+          </button>
+        </div>
+        <div class="pass-field">
+          <span class="pass-label">Depart</span>
+          <input type="date" id="departDate" required>
+        </div>
+        <div class="pass-field">
+          <span class="pass-label">Return (optional)</span>
+          <input type="date" id="returnDate">
+        </div>
+        <div class="pass-field">
+          <span class="pass-label">Travellers</span>
+          <select id="paxCount">
+            <option value="1">1 adult</option>
+            <option value="2">2 adults</option>
+            <option value="3">3 adults</option>
+            <option value="4">4 adults</option>
+          </select>
+        </div>
+      </div>
+      <div class="pass-bottom">
+        <div class="pass-options">
+          <div class="pass-opt">
+            <label for="cabinClass">Cabin</label>
+            <select id="cabinClass">
+              <option value="economy">Economy</option>
+              <option value="premium">Premium economy</option>
+              <option value="business">Business</option>
+            </select>
+          </div>
+          <div class="pass-opt">
+            <label for="tripType">Trip</label>
+            <select id="tripType">
+              <option value="oneway">One way</option>
+              <option value="round">Round trip</option>
+            </select>
+          </div>
+        </div>
+        <button type="submit" class="search-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          Search flights
+        </button>
+      </div>
+    </form>
+  </div>
+</header>
+
+<section class="results-section">
+  <div class="wrap">
+    <div class="results-head">
+      <div>
+        <h2 id="resultsTitle">Choose your flight</h2>
+        <div class="results-count" id="resultsCount">Search above to see live fares</div>
+      </div>
+      <div class="sort-row" id="sortRow" style="display:none;">
+        <button class="sort-btn active" data-sort="price">Cheapest</button>
+        <button class="sort-btn" data-sort="duration">Fastest</button>
+        <button class="sort-btn" data-sort="depart">Earliest</button>
+      </div>
+    </div>
+
+    <div id="boardWrap">
+      <div class="empty-state">
+        <h3>No search yet</h3>
+        <p>Pick your route and dates above, then hit search — flights will line up here like a departure board.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="routes" id="routes">
+  <div class="wrap">
+    <h2>Popular routes this month</h2>
+    <p class="routes-sub">Fares shown are the lowest one-way price found in the last 7 days.</p>
+    <table class="route-table" id="routeTable">
+      <thead>
+        <tr><th>Route</th><th>Flying time</th><th>Frequency</th><th style="text-align:right;">From</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</section>
+
+<section class="why" id="why">
+  <div class="wrap">
+    <h2>Booking should feel as clear as the board at the gate.</h2>
+    <div class="why-rows">
+      <div class="why-row">
+        <span class="idx">01</span>
+        <h3>Fares, not games</h3>
+        <p>The price you see at search is the price you pay — no surprise convenience charges added at checkout.</p>
+      </div>
+      <div class="why-row">
+        <span class="idx">02</span>
+        <h3>Free date changes</h3>
+        <p>Plans shift. Move your departure up to 24 hours before flying with no change fee, on every fare type.</p>
+      </div>
+      <div class="why-row">
+        <span class="idx">03</span>
+        <h3>Real seat maps</h3>
+        <p>What you pick during booking is the seat you sit in — pulled live from the airline, not a placeholder.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot-row">
+    <span>© 2026 Aerowave Travel Pvt Ltd — a demo booking interface.</span>
+    <span>Fares in ₹ INR · Prices are illustrative</span>
+  </div>
+</footer>
+
+<div class="drawer-backdrop" id="backdrop"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-head">
+    <h3 id="drawerTitle">Your selection</h3>
+    <button class="drawer-close" id="drawerClose" aria-label="Close">×</button>
+  </div>
+  <div class="drawer-body" id="drawerBody"></div>
+  <div class="drawer-foot" id="drawerFoot"></div>
+</div>
+
+<div class="auth-backdrop" id="authBackdrop">
+  <div class="auth-modal" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+    <div class="auth-head">
+      <h3 id="authTitle">Sign in</h3>
+      <button class="auth-close" id="authClose" aria-label="Close">×</button>
+    </div>
+    <div class="auth-tabs">
+      <button type="button" class="auth-tab active" data-mode="signin">Sign in</button>
+      <button type="button" class="auth-tab" data-mode="signup">Create account</button>
+    </div>
+    <div class="auth-body">
+      <div class="auth-error" id="authError"></div>
+      <form id="authForm">
+        <div class="field-group" id="nameField" style="display:none;">
+          <label for="authName">Full name</label>
+          <input id="authName" placeholder="Your name" autocomplete="name">
+        </div>
+        <div class="field-group">
+          <label for="authEmail">Email</label>
+          <input id="authEmail" type="email" placeholder="you@example.com" autocomplete="email" required>
+        </div>
+        <div class="field-group">
+          <label for="authPassword">Password</label>
+          <input id="authPassword" type="password" placeholder="At least 6 characters" autocomplete="current-password" required>
+        </div>
+        <div class="auth-hint" id="authHint">Use the email and password you signed up with.</div>
+        <button type="submit" class="auth-submit" id="authSubmit">Sign in</button>
+      </form>
+      <div class="auth-switch" id="authSwitch">
+        New to Aerowave? <button type="button" id="authSwitchBtn">Create an account</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const CITIES = [
+    {code:'MAA', name:'Chennai'},
+    {code:'BLR', name:'Bengaluru'},
+    {code:'DEL', name:'Delhi'},
+    {code:'BOM', name:'Mumbai'},
+    {code:'CJB', name:'Coimbatore'},
+    {code:'IXM', name:'Madurai'},
+    {code:'HYD', name:'Hyderabad'},
+    {code:'CCU', name:'Kolkata'},
+    {code:'GOI', name:'Goa'},
+    {code:'TRV', name:'Thiruvananthapuram'},
+  ];
+  const AIRLINES = ['SkyLoom','Terra Air','Monsoon Airways','Coastal Wings','Highline Air'];
+
+  const fromSel = document.getElementById('fromCity');
+  const toSel = document.getElementById('toCity');
+  CITIES.forEach((c,i)=>{
+    const o1=document.createElement('option'); o1.value=c.code; o1.textContent=`${c.name} (${c.code})`;
+    fromSel.appendChild(o1);
+    const o2=document.createElement('option'); o2.value=c.code; o2.textContent=`${c.name} (${c.code})`;
+    toSel.appendChild(o2);
+  });
+  fromSel.value='MAA';
+  toSel.value='DEL';
+
+  document.getElementById('swapBtn').addEventListener('click', ()=>{
+    const a=fromSel.value; fromSel.value=toSel.value; toSel.value=a;
+  });
+
+  // default date = tomorrow
+  const dep = document.getElementById('departDate');
+  const t = new Date(); t.setDate(t.getDate()+1);
+  dep.value = t.toISOString().slice(0,10);
+  dep.min = new Date().toISOString().slice(0,10);
+
+  function cityName(code){ return CITIES.find(c=>c.code===code)?.name || code; }
+
+  // seeded pseudo-random so results feel stable per search, not fully random each render
+  function seededRandom(seed){
+    let s = seed % 2147483647;
+    if (s<=0) s += 2147483646;
+    return function(){
+      s = s * 16807 % 2147483647;
+      return (s-1)/2147483646;
+    };
+  }
+  function hashStr(str){
+    let h=0;
+    for(let i=0;i<str.length;i++){ h = (h*31 + str.charCodeAt(i)) | 0; }
+    return Math.abs(h) || 1;
+  }
+
+  function genFlights(from,to,dateStr,cabin){
+    const rnd = seededRandom(hashStr(from+to+dateStr+cabin));
+    const count = 5 + Math.floor(rnd()*3);
+    const basePrice = 2600 + Math.floor(rnd()*2200);
+    const cabinMult = cabin==='business'?2.6:(cabin==='premium'?1.5:1);
+    const flights = [];
+    for(let i=0;i<count;i++){
+      const airline = AIRLINES[Math.floor(rnd()*AIRLINES.length)];
+      const num = 100 + Math.floor(rnd()*800);
+      const depHour = 5 + Math.floor(rnd()*17);
+      const depMin = Math.floor(rnd()*12)*5;
+      const durMin = 80 + Math.floor(rnd()*140);
+      const stops = rnd() > 0.72 ? 1 : 0;
+      const priceJitter = Math.floor(rnd()*1600) - 300;
+      const price = Math.max(1899, Math.round((basePrice + priceJitter*(i+1)*0.35) * cabinMult / 10) * 10);
+
+      const depTotal = depHour*60+depMin;
+      const arrTotal = depTotal + durMin;
+      const arrHour = Math.floor(arrTotal/60)%24;
+      const arrMin = arrTotal%60;
+      const dayOver = Math.floor(arrTotal/60) >= 24;
+
+      flights.push({
+        airline, flightNo: airline.slice(0,2).toUpperCase()+num,
+        depTime: fmtTime(depHour,depMin), arrTime: fmtTime(arrHour,arrMin),
+        depCode: from, arrCode: to,
+        durMin, stops, price, dayOver
+      });
+    }
+    return flights;
+  }
+  function fmtTime(h,m){
+    const ampm = h>=12?'PM':'AM';
+    let hh = h%12; if(hh===0) hh=12;
+    return `${hh}:${String(m).padStart(2,'0')} ${ampm}`;
+  }
+  function fmtDur(min){
+    const h = Math.floor(min/60), m = min%60;
+    return `${h}h ${m}m`;
+  }
+
+  let currentFlights = [];
+  let currentSort = 'price';
+  let selectedFlight = null;
+  let searchMeta = null;
+
+  const boardWrap = document.getElementById('boardWrap');
+  const resultsCount = document.getElementById('resultsCount');
+  const resultsTitle = document.getElementById('resultsTitle');
+  const sortRow = document.getElementById('sortRow');
+
+  function renderBoard(){
+    let list = [...currentFlights];
+    if(currentSort==='price') list.sort((a,b)=>a.price-b.price);
+    if(currentSort==='duration') list.sort((a,b)=>a.durMin-b.durMin);
+    if(currentSort==='depart') list.sort((a,b)=> a.depTime.localeCompare(b.depTime));
+
+    if(list.length===0){
+      boardWrap.innerHTML = `<div class="empty-state"><h3>No flights on this route</h3><p>Try a different date or nearby airport.</p></div>`;
+      return;
+    }
+
+    const rows = list.map((f,i)=>`
+      <div class="flight-row" data-idx="${i}" tabindex="0" role="button" aria-label="Select ${f.airline} ${f.flightNo}, ₹${f.price}">
+        <div class="fr-airline">
+          <span class="name">${f.airline}</span>
+          <span class="num mono">${f.flightNo}</span>
+        </div>
+        <div class="fr-time">
+          <span>${f.depTime}</span><span class="arrow">→</span><span>${f.arrTime}${f.dayOver?'⁺¹':''}</span>
+        </div>
+        <div class="fr-duration">${fmtDur(f.durMin)}
+          <span class="stop">${f.stops===0?'Nonstop':'1 stop'}</span>
+        </div>
+        <div class="fr-cabin">${searchMeta.cabinLabel}</div>
+        <div class="fr-price">
+          <span class="amt">₹${f.price.toLocaleString('en-IN')}</span>
+          <span class="per">per traveller</span>
+        </div>
+      </div>
+    `).join('');
+
+    boardWrap.innerHTML = `
+      <div class="board">
+        <div class="board-header-row">
+          <div>Airline</div><div>Departure → arrival</div><div>Duration</div><div>Cabin</div><div style="text-align:right;">Fare</div>
+        </div>
+        ${rows}
+      </div>
+    `;
+
+    boardWrap.querySelectorAll('.flight-row').forEach(row=>{
+      row.addEventListener('click', ()=> openDrawer(list[+row.dataset.idx]));
+      row.addEventListener('keydown', (e)=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); openDrawer(list[+row.dataset.idx]); }});
+    });
+  }
+
+  document.getElementById('searchForm').addEventListener('submit', (e)=>{
+    e.preventDefault();
+    const from = fromSel.value, to = toSel.value;
+    if(from===to){ alert('Pick two different cities to fly between.'); return; }
+    const cabin = document.getElementById('cabinClass').value;
+    const cabinLabel = {economy:'Economy',premium:'Premium economy',business:'Business'}[cabin];
+    const dateStr = dep.value;
+    const pax = document.getElementById('paxCount').value;
+
+    currentFlights = genFlights(from,to,dateStr,cabin);
+    searchMeta = {from,to,cabinLabel,dateStr,pax};
+    currentSort = 'price';
+    sortRow.querySelectorAll('.sort-btn').forEach(b=>b.classList.toggle('active', b.dataset.sort==='price'));
+
+    const dateFmt = new Date(dateStr+'T00:00:00').toLocaleDateString('en-IN', {weekday:'short', day:'numeric', month:'short'});
+    resultsTitle.textContent = `${cityName(from)} → ${cityName(to)}`;
+    resultsCount.textContent = `${currentFlights.length} flights · ${dateFmt} · ${pax} traveller${pax>1?'s':''}`;
+    sortRow.style.display='flex';
+    renderBoard();
+    document.querySelector('.results-section').scrollIntoView({behavior:'smooth', block:'start'});
+  });
+
+  sortRow.addEventListener('click', (e)=>{
+    const btn = e.target.closest('.sort-btn');
+    if(!btn) return;
+    currentSort = btn.dataset.sort;
+    sortRow.querySelectorAll('.sort-btn').forEach(b=>b.classList.toggle('active', b===btn));
+    renderBoard();
+  });
+
+  // ---------- Drawer / booking ----------
+  const backdrop = document.getElementById('backdrop');
+  const drawer = document.getElementById('drawer');
+  const drawerBody = document.getElementById('drawerBody');
+  const drawerFoot = document.getElementById('drawerFoot');
+  const drawerTitle = document.getElementById('drawerTitle');
+
+  let pendingTraveller = null;
+  let selectedPayMethod = null;
+
+  function fareTotals(flight){
+    const pax = +searchMeta.pax;
+    const total = flight.price * pax;
+    const fees = Math.round(total*0.03);
+    return { pax, total, fees, grand: total+fees };
+  }
+
+  function openDrawer(flight){
+    selectedFlight = flight;
+    pendingTraveller = null;
+    selectedPayMethod = null;
+    renderDetailsStep();
+    backdrop.classList.add('open');
+    drawer.classList.add('open');
+  }
+
+  function renderDetailsStep(){
+    const flight = selectedFlight;
+    const { pax, total, fees, grand } = fareTotals(flight);
+    drawerTitle.textContent = 'Your selection';
+    drawerBody.innerHTML = `
+      <div class="drawer-flight">
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+          <strong>${flight.airline}</strong><span class="mono" style="color:var(--muted);font-size:13px;">${flight.flightNo}</span>
+        </div>
+        <div style="font-size:14px;color:var(--muted);">${cityName(searchMeta.from)} (${flight.depTime}) → ${cityName(searchMeta.to)} (${flight.arrTime})</div>
+      </div>
+      <div class="drawer-row"><span>Fare × ${pax}</span><span class="amt">₹${total.toLocaleString('en-IN')}</span></div>
+      <div class="drawer-row"><span>Taxes &amp; fees</span><span class="amt">₹${fees.toLocaleString('en-IN')}</span></div>
+      <div class="drawer-row total"><span>Total</span><span class="amt">₹${grand.toLocaleString('en-IN')}</span></div>
+      <div style="margin-top:20px;">
+        <div class="field-group"><label for="passName">Traveller full name</label><input id="passName" placeholder="As on government ID" value="${pendingTraveller?.name ? esc(pendingTraveller.name) : ''}" required></div>
+        <div class="field-group"><label for="passEmail">Email for e-ticket</label><input id="passEmail" type="email" placeholder="you@example.com" value="${pendingTraveller?.email ? esc(pendingTraveller.email) : ''}" required></div>
+      </div>
+    `;
+    drawerFoot.innerHTML = `<button class="confirm-btn" id="continueBtn">Continue to pay · ₹${grand.toLocaleString('en-IN')}</button>`;
+    document.getElementById('continueBtn').addEventListener('click', proceedToPayment);
+  }
+
+  function proceedToPayment(){
+    const name = document.getElementById('passName').value.trim();
+    const email = document.getElementById('passEmail').value.trim();
+    if(!name || !email){
+      alert('Add the traveller name and email to continue.');
+      return;
+    }
+    pendingTraveller = { name, email };
+    renderPaymentStep();
+  }
+
+  const PAY_METHODS = [
+    { id:'gpay', label:'Google Pay', bg:'#fff', fg:'#4285F4', border:true, glyph:'G' },
+    { id:'phonepe', label:'PhonePe', bg:'#5F259F', fg:'#fff', glyph:'Pe' },
+    { id:'paytm', label:'Paytm', bg:'#00BAF2', fg:'#fff', glyph:'P' },
+    { id:'upi', label:'Other UPI ID', bg:'var(--ink)', fg:'#fff', glyph:'@' },
+  ];
+
+  function renderPaymentStep(){
+    const flight = selectedFlight;
+    const { grand } = fareTotals(flight);
+    drawerTitle.textContent = 'Pay with UPI';
+    drawerBody.innerHTML = `
+      <div class="pay-amount">
+        <span class="pay-amount-label">Amount to pay</span>
+        <span class="pay-amount-value">₹${grand.toLocaleString('en-IN')}</span>
+      </div>
+      <div class="pay-methods">
+        ${PAY_METHODS.map(m=>`
+          <button type="button" class="pay-method" data-m="${m.id}">
+            <span class="pay-icon" style="background:${m.bg};color:${m.fg};${m.border?'border:1px solid var(--line);':''}">${m.glyph}</span>
+            ${m.label}
+            <span class="pay-check">✓</span>
+          </button>
+        `).join('')}
+      </div>
+      <div id="upiIdRow" style="display:none;margin-top:14px;">
+        <div class="field-group"><label for="upiIdInput">Enter your UPI ID</label><input id="upiIdInput" placeholder="yourname@bank"></div>
+      </div>
+      <p class="pay-note">Demo checkout — this simulates a UPI payment and doesn't move real money.</p>
+    `;
+    drawerFoot.innerHTML = `
+      <button class="confirm-btn" id="backToDetails" style="background:transparent;color:var(--ink);border:1px solid var(--line);margin-bottom:10px;">← Back to details</button>
+      <button class="confirm-btn" id="payNowBtn" disabled>Select a payment method</button>
+    `;
+
+    document.getElementById('backToDetails').addEventListener('click', renderDetailsStep);
+
+    const payNowBtn = document.getElementById('payNowBtn');
+    const upiIdRow = document.getElementById('upiIdRow');
+    document.querySelectorAll('.pay-method').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        selectedPayMethod = btn.dataset.m;
+        document.querySelectorAll('.pay-method').forEach(b=>b.classList.toggle('selected', b===btn));
+        const m = PAY_METHODS.find(x=>x.id===selectedPayMethod);
+        upiIdRow.style.display = selectedPayMethod==='upi' ? 'block' : 'none';
+        payNowBtn.disabled = false;
+        payNowBtn.textContent = `Pay ₹${grand.toLocaleString('en-IN')} via ${m.label}`;
+        if(selectedPayMethod==='upi') setTimeout(()=>document.getElementById('upiIdInput')?.focus(), 30);
+      });
+    });
+
+    payNowBtn.addEventListener('click', ()=>{
+      if(selectedPayMethod==='upi'){
+        const upiId = document.getElementById('upiIdInput').value.trim();
+        if(!/^[\w.\-]{2,}@[a-zA-Z]{2,}$/.test(upiId)){
+          alert('Enter a valid UPI ID, like name@bank.');
+          return;
+        }
+      }
+      runPayment();
+    });
+  }
+
+  function runPayment(){
+    const flight = selectedFlight;
+    const { grand } = fareTotals(flight);
+    const m = PAY_METHODS.find(x=>x.id===selectedPayMethod);
+    drawerTitle.textContent = 'Processing payment';
+    drawerBody.innerHTML = `
+      <div class="pay-processing">
+        <div class="spinner"></div>
+        <p style="font-size:14px;color:var(--muted);">Confirming ₹${grand.toLocaleString('en-IN')} via ${m.label}…</p>
+        <p style="font-size:12px;color:var(--muted-light);margin-top:6px;">Don't close this window.</p>
+      </div>
+    `;
+    drawerFoot.innerHTML = '';
+    setTimeout(()=> tryConfirm(m), 1600);
+  }
+
+  function tryConfirm(payMethod){
+    const { name, email } = pendingTraveller;
+    const { grand } = fareTotals(selectedFlight);
+    const ref = 'AW' + Math.random().toString(36).slice(2,8).toUpperCase();
+    const utr = Math.floor(100000000000 + Math.random()*899999999999);
+    saveBookingToBackend(ref, selectedFlight, grand, name, email, payMethod.label, utr);
+    drawerTitle.textContent = 'Booked';
+    drawerBody.innerHTML = `
+      <div class="booked-state">
+        <div class="booked-mark">✓</div>
+        <h3 style="font-family:'Fraunces',serif;font-size:20px;">You're confirmed, ${esc(name.split(' ')[0])}</h3>
+        <p style="color:var(--muted);font-size:14px;">E-ticket sent to ${esc(email)}</p>
+        <div class="booked-ref">${ref}</div>
+        <p style="color:var(--muted);font-size:13px;">${cityName(searchMeta.from)} → ${cityName(searchMeta.to)} · ${selectedFlight.airline} ${selectedFlight.flightNo}</p>
+        <div class="pay-receipt">
+          <span>Paid via ${payMethod.label}</span>
+          <span class="mono">UTR ${utr}</span>
+        </div>
+        ${backendUser ? `<p style="color:var(--teal);font-size:12px;margin-top:10px;">Saved to your account — view it under My bookings.</p>` : ''}
+      </div>
+    `;
+    drawerFoot.innerHTML = `<button class="confirm-btn" id="doneBtn">Done</button>`;
+    document.getElementById('doneBtn').addEventListener('click', closeDrawer);
+  }
+
+  function closeDrawer(){
+    backdrop.classList.remove('open');
+    drawer.classList.remove('open');
+  }
+  backdrop.addEventListener('click', closeDrawer);
+  document.getElementById('drawerClose').addEventListener('click', closeDrawer);
+  document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeDrawer(); });
+
+  // ---------- Popular routes ----------
+  const ROUTES = [
+    ['Chennai','Delhi','2h 40m','6x daily',3299],
+    ['Bengaluru','Mumbai','1h 40m','9x daily',2899],
+    ['Chennai','Coimbatore','1h 10m','5x daily',1999],
+    ['Delhi','Goa','2h 45m','3x daily',4199],
+    ['Mumbai','Kolkata','2h 30m','4x daily',3799],
+    ['Chennai','Thiruvananthapuram','1h 20m','4x daily',2599],
+    ['Bengaluru','Hyderabad','1h 15m','7x daily',2199],
+    ['Delhi','Madurai','3h 05m','1x daily',4899],
+  ];
+  const routeBody = document.querySelector('#routeTable tbody');
+  routeBody.innerHTML = ROUTES.map(([a,b,dur,freq,price])=>`
+    <tr data-a="${a}" data-b="${b}">
+      <td><span class="route-pair">${a} → ${b}</span></td>
+      <td>${dur}</td>
+      <td>${freq}</td>
+      <td class="route-price">₹${price.toLocaleString('en-IN')}</td>
+    </tr>
+  `).join('');
+  routeBody.querySelectorAll('tr').forEach(tr=>{
+    tr.addEventListener('click', ()=>{
+      const aCode = CITIES.find(c=>c.name===tr.dataset.a)?.code;
+      const bCode = CITIES.find(c=>c.name===tr.dataset.b)?.code;
+      if(aCode && bCode){
+        fromSel.value = aCode; toSel.value = bCode;
+        document.getElementById('search').scrollIntoView({behavior:'smooth'});
+        document.getElementById('searchForm').requestSubmit();
+      }
+    });
+  });
+
+  // ---------- Auth (sign in / create account) ----------
+  const AUTH_KEY = 'aerowave_accounts';
+  const SESSION_KEY = 'aerowave_session';
+
+  function loadAccounts(){
+    try{
+      const raw = localStorage.getItem(AUTH_KEY);
+      return raw ? JSON.parse(raw) : {};
+    }catch(e){ return {}; }
+  }
+  function saveAccounts(accounts){
+    try{ localStorage.setItem(AUTH_KEY, JSON.stringify(accounts)); }catch(e){}
+  }
+  function getSession(){
+    try{ return localStorage.getItem(SESSION_KEY); }catch(e){ return null; }
+  }
+  function setSession(email){
+    try{
+      if(email) localStorage.setItem(SESSION_KEY, email);
+      else localStorage.removeItem(SESSION_KEY);
+    }catch(e){}
+  }
+
+  const authBackdrop = document.getElementById('authBackdrop');
+  const authForm = document.getElementById('authForm');
+  const authError = document.getElementById('authError');
+  const authTitle = document.getElementById('authTitle');
+  const authSubmit = document.getElementById('authSubmit');
+  const authHint = document.getElementById('authHint');
+  const authSwitch = document.getElementById('authSwitch');
+  const authSwitchBtn = document.getElementById('authSwitchBtn');
+  const nameField = document.getElementById('nameField');
+  const authName = document.getElementById('authName');
+  const authEmail = document.getElementById('authEmail');
+  const authPassword = document.getElementById('authPassword');
+  const navAuthBtn = document.getElementById('navAuthBtn');
+  const accountMenu = document.getElementById('accountMenu');
+  const accountWho = document.getElementById('accountWho');
+
+  let authMode = 'signin';
+
+  function setAuthMode(mode){
+    authMode = mode;
+    authError.classList.remove('show');
+    document.querySelectorAll('.auth-tab').forEach(t=>t.classList.toggle('active', t.dataset.mode===mode));
+    if(mode==='signin'){
+      authTitle.textContent = 'Sign in';
+      nameField.style.display = 'none';
+      authName.removeAttribute('required');
+      authPassword.setAttribute('autocomplete','current-password');
+      authHint.textContent = 'Use the email and password you signed up with.';
+      authSubmit.textContent = 'Sign in';
+      authSwitch.innerHTML = `New to Aerowave? <button type="button" id="authSwitchBtn">Create an account</button>`;
+    } else {
+      authTitle.textContent = 'Create account';
+      nameField.style.display = 'block';
+      authPassword.setAttribute('autocomplete','new-password');
+      authHint.textContent = 'Password needs at least 6 characters.';
+      authSubmit.textContent = 'Create account';
+      authSwitch.innerHTML = `Already have an account? <button type="button" id="authSwitchBtn">Sign in</button>`;
+    }
+    document.getElementById('authSwitchBtn').addEventListener('click', ()=> setAuthMode(mode==='signin' ? 'signup' : 'signin'));
+  }
+
+  document.querySelectorAll('.auth-tab').forEach(tab=>{
+    tab.addEventListener('click', ()=> setAuthMode(tab.dataset.mode));
+  });
+  authSwitchBtn.addEventListener('click', ()=> setAuthMode('signup'));
+
+  function openAuth(){
+    authForm.reset();
+    authError.classList.remove('show');
+    setAuthMode('signin');
+    authBackdrop.classList.add('open');
+    setTimeout(()=>authEmail.focus(), 50);
+  }
+  function closeAuth(){ authBackdrop.classList.remove('open'); }
+  document.getElementById('authClose').addEventListener('click', closeAuth);
+  authBackdrop.addEventListener('click', (e)=>{ if(e.target===authBackdrop) closeAuth(); });
+  document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeAuth(); });
+
+  function showAuthError(msg){
+    authError.textContent = msg;
+    authError.classList.add('show');
+  }
+
+  authForm.addEventListener('submit', (e)=>{
+    e.preventDefault();
+    authError.classList.remove('show');
+    const email = authEmail.value.trim().toLowerCase();
+    const password = authPassword.value;
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+    if(!emailOk){ showAuthError('Enter a valid email address.'); return; }
+    if(password.length < 6){ showAuthError('Password needs at least 6 characters.'); return; }
+
+    const accounts = loadAccounts();
+
+    if(authMode === 'signup'){
+      const name = authName.value.trim();
+      if(!name){ showAuthError('Add your name to create an account.'); return; }
+      if(accounts[email]){
+        showAuthError('An account with this email already exists — sign in instead.');
+        return;
+      }
+      authSubmit.disabled = true; authSubmit.textContent = 'Creating account…';
+      setTimeout(()=>{
+        accounts[email] = { password, name };
+        saveAccounts(accounts);
+        setSession(email);
+        authSubmit.disabled = false;
+        finishAuth(email, name);
+      }, 500);
+    } else {
+      const account = accounts[email];
+      if(!account){
+        showAuthError('No account with this email yet — create one instead.');
+        return;
+      }
+      if(account.password !== password){
+        showAuthError('That password doesn\'t match. Try again.');
+        return;
+      }
+      authSubmit.disabled = true; authSubmit.textContent = 'Signing in…';
+      setTimeout(()=>{
+        setSession(email);
+        authSubmit.disabled = false;
+        finishAuth(email, account.name);
+      }, 450);
+    }
+  });
+
+  function finishAuth(email, name){
+    closeAuth();
+    updateNavAuth(email, name);
+  }
+
+  function initials(name, email){
+    if(name){
+      const parts = name.trim().split(/\s+/);
+      return ((parts[0]?.[0]||'') + (parts[1]?.[0]||'')).toUpperCase() || name[0].toUpperCase();
+    }
+    return email[0].toUpperCase();
+  }
+
+  function updateNavAuth(email, name){
+    const wrap = navAuthBtn.parentElement;
+    navAuthBtn.style.display = 'none';
+    let chip = document.getElementById('accountChip');
+    if(!chip){
+      chip = document.createElement('button');
+      chip.id = 'accountChip';
+      chip.type = 'button';
+      chip.className = 'account-chip';
+      wrap.insertBefore(chip, accountMenu);
+      chip.addEventListener('click', ()=> accountMenu.classList.toggle('open'));
+    }
+    chip.innerHTML = `<span class="account-avatar">${initials(name,email)}</span>${name ? name.split(' ')[0] : email.split('@')[0]}`;
+    accountWho.textContent = email;
+    chip.style.display = 'flex';
+  }
+
+  function signOutUI(){
+    setSession(null);
+    const chip = document.getElementById('accountChip');
+    if(chip) chip.style.display = 'none';
+    accountMenu.classList.remove('open');
+    navAuthBtn.style.display = 'inline-block';
+  }
+
+  navAuthBtn.addEventListener('click', openAuth);
+  document.getElementById('signOutBtn').addEventListener('click', signOutUI);
+  document.addEventListener('click', (e)=>{
+    if(!e.target.closest('#accountMenu') && !e.target.closest('#accountChip')){
+      accountMenu.classList.remove('open');
+    }
+  });
+
+  // restore session on load
+  (function restoreSession(){
+    const email = getSession();
+    if(email){
+      const accounts = loadAccounts();
+      const account = accounts[email];
+      if(account) updateNavAuth(email, account.name);
+      else setSession(null);
+    }
+  })();
+
+  // ---------- Real backend (accounts + saved bookings, org-authenticated) ----------
+  let dbCap = null, userCap = null, backendUser = null;
+
+  async function initRealBackend(){
+    if(typeof claude === 'undefined' || !claude.use) return; // not running inside the artifact runtime
+    try{ userCap = await claude.use('user'); }catch(e){ userCap = null; }
+    try{ dbCap = await claude.use('db'); }catch(e){ dbCap = null; }
+    if(!userCap) return;
+    let me;
+    try{ me = await userCap.me(); }catch(e){ return; }
+    if(me && me.id){
+      backendUser = { id: me.id, name: me.name || '' };
+      showBackendIdentity(backendUser);
+    }
+  }
+
+  function showBackendIdentity(u){
+    navAuthBtn.style.display = 'none';
+    let chip = document.getElementById('accountChip');
+    if(!chip){
+      chip = document.createElement('button');
+      chip.id = 'accountChip'; chip.type = 'button'; chip.className = 'account-chip';
+      navAuthBtn.parentElement.insertBefore(chip, accountMenu);
+      chip.addEventListener('click', ()=> accountMenu.classList.toggle('open'));
+    }
+    chip.innerHTML = `<span class="account-avatar">${initials(u.name,'you')}</span>${u.name ? u.name.split(' ')[0] : 'Account'}`;
+    chip.style.display = 'flex';
+    accountMenu.innerHTML = `
+      <div class="who">${u.name ? esc(u.name) : 'Signed in'} · saved to your account</div>
+      <button type="button" id="myBookingsBtn">My bookings</button>
+    `;
+    document.getElementById('myBookingsBtn').addEventListener('click', openMyBookings);
+  }
+
+  function esc(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+
+  async function saveBookingToBackend(ref, flight, total, name, email, payMethodLabel, utr){
+    if(!dbCap || !backendUser) return;
+    try{
+      await dbCap.doc('data/users/'+backendUser.id+'/bookings/'+ref).set({
+        ref,
+        airline: flight.airline, flightNo: flight.flightNo,
+        from: searchMeta.from, to: searchMeta.to,
+        depTime: flight.depTime, arrTime: flight.arrTime,
+        total, travellerName: name, travellerEmail: email,
+        payMethod: payMethodLabel || '', utr: utr ? String(utr) : '',
+        bookedAt: new Date().toISOString()
+      });
+    }catch(e){ /* non-fatal: booking still confirms in the UI */ }
+  }
+
+  async function openMyBookings(){
+    accountMenu.classList.remove('open');
+    drawerTitle.textContent = 'My bookings';
+    drawerBody.innerHTML = `<p style="color:var(--muted);font-size:14px;">Loading your saved bookings…</p>`;
+    drawerFoot.innerHTML = '';
+    backdrop.classList.add('open');
+    drawer.classList.add('open');
+
+    if(!dbCap || !backendUser){
+      drawerBody.innerHTML = `<p style="color:var(--muted);font-size:14px;">Backend storage isn't available in this view, so past bookings aren't kept here.</p>`;
+      return;
+    }
+    try{
+      const snap = await dbCap.collection('data/users/'+backendUser.id+'/bookings').orderBy('bookedAt','desc').limit(20).get();
+      if(snap.empty){
+        drawerBody.innerHTML = `<p style="color:var(--muted);font-size:14px;">No bookings yet — book a flight and it'll be saved here, tied to your account.</p>`;
+        return;
+      }
+      drawerBody.innerHTML = snap.docs.map(d=>{
+        const b = d.data();
+        const when = b.bookedAt ? new Date(b.bookedAt).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) : '';
+        return `
+          <div class="drawer-flight">
+            <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+              <strong>${esc(b.airline||'')}</strong>
+              <span class="mono" style="color:var(--muted);font-size:13px;">${esc(b.ref||d.id)}</span>
+            </div>
+            <div style="font-size:13px;color:var(--muted);">${esc(cityName(b.from))} → ${esc(cityName(b.to))} · ${esc(b.depTime||'')}</div>
+            <div style="font-size:13px;margin-top:6px;display:flex;justify-content:space-between;">
+              <span>${when}${b.payMethod ? ' · '+esc(b.payMethod) : ''}</span><span class="mono">₹${(b.total||0).toLocaleString('en-IN')}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }catch(e){
+      drawerBody.innerHTML = `<p style="color:var(--muted);font-size:14px;">Couldn't load bookings right now — try again in a moment.</p>`;
+    }
+  }
+
+  initRealBackend();
+
+})();
+</script>
+</body>
+</html>
